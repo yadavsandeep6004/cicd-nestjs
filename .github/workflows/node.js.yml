@@ -11,12 +11,23 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
       - uses: actions/checkout@v3
-      - name: Update npm
-        run: npm install -g npm@latest
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          # Specify the npm version compatible with your Node.js version
+          # You can replace "8.19.4" with the npm version provided by your Node.js installation
+          # Alternatively, you can install a specific compatible version of npm using npm itself
+          # For example, npm install -g npm@8.19.4
+          # However, ensure that the specified npm version matches the requirements of your project
+          # This example assumes npm version 8.19.4 is compatible with your project
+          # You might need to adjust this version based on your project's dependencies
+          npm: '8.19.4'
+          cache: 'npm'
+      - run: npm install -g npm@8.19.4
       - name: Cache npm dependencies
         uses: actions/cache@v2
         with:
@@ -24,18 +35,9 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - name: Set up environment variables
-        run: |
+      - run: |
           touch .env
           echo "${{ secrets.PROD_ENV_FILE }}" > .env
-      - name: Install dependencies
-        run: npm ci --no-progress
-      - name: Build project
-        run: npm run build --if-present
-      - name: Restart application
-        run: pm2 restart nestjs-app
+      - run: npm ci --no-progress
+      - run: npm run build --if-present
+      - run: pm2 restart nestjs-app
