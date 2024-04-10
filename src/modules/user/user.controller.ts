@@ -23,7 +23,7 @@ export class UserController {
 
   @Get('cicd')
   async welcome() {
-    return 'Welcome to cicd pipeline with github actions';
+    return 'Welcome to cicd pipeline';
   }
 
   @Post('upload')
